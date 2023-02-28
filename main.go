@@ -78,20 +78,23 @@ func main() {
 
 	var conn gorqlite.Connection
 	rqliteURI := viper.GetString("rqlite.uri")
-
-	for true {
-		conn1, err := gorqlite.Open(rqliteURI)
-
-		_, err1 := conn1.Leader()
-		utils.LogInfo("%s\t%s\t%v", "leader", rqliteURI, err1)
-
-		if err != nil {
-			utils.LogInfo("RETRY")
-			time.Sleep(1 * time.Second)
-		} else {
-			utils.LogInfo("CONNECTED")
-			conn = conn1
-			break
+	if env == "development" {
+		conn, _ = gorqlite.Open(rqliteURI)
+	} else {
+		for true {
+			conn1, err := gorqlite.Open(rqliteURI)
+	
+			_, err1 := conn1.Leader()
+			utils.LogInfo("%s\t%s\t%v", "leader", rqliteURI, err1)
+	
+			if err != nil {
+				utils.LogInfo("RETRY")
+				time.Sleep(1 * time.Second)
+			} else {
+				utils.LogInfo("CONNECTED")
+				conn = conn1
+				break
+			}
 		}
 	}
 

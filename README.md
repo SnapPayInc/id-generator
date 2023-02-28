@@ -74,32 +74,46 @@ Please note that, the conversion from environmental variables to API configurati
 Make some basic calls key as 'test' first.
 
 ```
-http://localhost:38083/id_generator/test/tap
+http://localhost:8080/id_generator/test/tap (PUT)
 ```
 
 Normally, it will return 1
 
 ```json
-{"last_insert_id":1"}
+{"last_insert_id":1}
 ```
 
 If you keep make request, it return:
 
 ```json
-{"last_insert_id":2"}
+{"last_insert_id":2}
+```
+
+If you want to make a batch request, like this:
+
+```
+http://localhost:8080/id_generator/test/tap?count=5 (PUT)
+```
+it return:
+```json
+{"last_insert_ids":[7,6,5,4,3]}
 ```
 
 After run the reset request, we got:
 
 ```
-http://localhost:38083/id_generator/test/set
-http://localhost:38083/id_generator/test/tap
+http://localhost:8080/id_generator/test/set\ # (POST)
+--header 'Content-Type: application/json' \
+--data-raw '{"value":100}'
+```
+```
+http://localhost:8080/id_generator/test/tap
 ```
 
-It returns to default
+It returns to the value you set
 
 ```json
-{"last_insert_id":1"}
+{"last_insert_id":101}
 ```
 
 ## Others

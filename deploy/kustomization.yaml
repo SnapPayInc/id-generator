@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - rqlite-service.yaml
+  - rqlite-sts.yaml
+  - id-generator-service.yaml
+  - id-generator-deploy.yaml
+namespace: component-test
+
+images:
+  - name: id-generator-image
+    newName: 594726941651.dkr.ecr.us-east-1.amazonaws.com/snappay/biz-component
+    newTag: id-generator-230227

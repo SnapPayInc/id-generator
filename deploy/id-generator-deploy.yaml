@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: id-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: id-generator
+  template:
+    metadata:
+      labels:
+        app: id-generator
+    spec:
+      containers:
+        - name: id-generator
+          env:
+            - name: RQLITE__URI
+              value: http://id-generator-rqlite:4001
+          image: id-generator-image
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 500m
+              memory: 500Mi
+            limits:
+              cpu: 1
+              memory: 1000Mi
+      restartPolicy: Always

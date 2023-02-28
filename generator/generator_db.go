@@ -3,6 +3,7 @@ package generator
 import (
 	"fmt"
 	"time"
+	"strings"
 
 	"github.com/rqlite/gorqlite"
 
@@ -40,9 +41,17 @@ func (db *GeneratorDB) Set(tableName string, value int64) (int64, error) {
 	return seed, nil
 }
 
-func (db *GeneratorDB) Insert(tableName string) (int64, error) {
+func (db *GeneratorDB) Insert(tableName string, count int) (int64, error) {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	insertCounter := fmt.Sprintf(`INSERT INTO %s (modified) VALUES (%d)`, tableName, now)
+	insertCounter := fmt.Sprintf(`INSERT INTO %s (modified) VALUES `, tableName)
+	if count < 1 {
+		count = 1
+	}
+	s := make([]string, count)
+    for i := range s {
+        s[i] = fmt.Sprintf("(%d)",now)
+    }
+	insertCounter += strings.Join(s, ",")
 	res, err := db.conn.WriteOne(insertCounter)
 	if err != nil {
 		db.logger.Error(err.Error())

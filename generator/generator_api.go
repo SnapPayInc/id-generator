@@ -3,6 +3,7 @@ package generator
 import (
 	"crypto/sha1"
 	"fmt"
+	"strconv"
 	"id-generator/utils"
 	"net/http"
 
@@ -35,8 +36,13 @@ func tableNameHash(name string) string {
 
 func (app *GeneratorAPI) tap(c *gin.Context) {
 	key := tableNameHash(c.Param("key"))
+	var count int
+	count,err := strconv.Atoi(c.DefaultQuery("count", "1"))
+	if err != nil {
+		count = 1
+	}
 	utils.LogInfo("create table")
-	err := app.generatorStore.CreateTableIfNotExist(key)
+	err = app.generatorStore.CreateTableIfNotExist(key)
 	if err != nil {
 		app.Logger.Debug("Cannot create table")
 		c.JSON(http.StatusBadRequest,
@@ -48,7 +54,7 @@ func (app *GeneratorAPI) tap(c *gin.Context) {
 	utils.LogInfo("create table done")
 
 	utils.LogInfo("insert")
-	seed, err := app.generatorStore.Insert(key)
+	seed, err := app.generatorStore.Insert(key, count)
 	if err != nil {
 		app.Logger.Debug("Insert error")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -57,10 +63,20 @@ func (app *GeneratorAPI) tap(c *gin.Context) {
 		return
 	}
 	utils.LogInfo("insert done")
-
-	c.JSON(http.StatusOK, gin.H{
-		"last_insert_id": seed,
-	})
+	if count > 1 {
+		seeds := make([]int64, count)
+		for i := range seeds {
+			seeds[i] = seed - int64(i)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"last_insert_ids": seeds,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"last_insert_id": seed,
+		})
+	}
+	
 }
 
 func (app *GeneratorAPI) set(c *gin.Context) {
@@ -84,22 +100,30 @@ func (app *GeneratorAPI) set(c *gin.Context) {
 		})
 		return
 	}
-	value := int64(updateMap["value"].(float64))
+	
+	if val, ok := updateMap["value"]; ok {
+		value := int64(val.(float64))
+		seed, err := app.generatorStore.Set(key, value)
+		if err != nil {
+			app.Logger.Debug("Insert error")
+			existed, _ := app.generatorStore.QueryLast(key)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("Insert error: the value must be larger then %v", existed),
+			})
+			return
+		}
 
-	seed, err := app.generatorStore.Set(key, value)
-	if err != nil {
-		app.Logger.Debug("Insert error")
+		if seed != value {
+			fmt.Println(seed, value)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"last_insert_id": seed,
+		})
+	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Insert error",
+			"error": "No value in post body",
 		})
 		return
 	}
-
-	if seed != value {
-		fmt.Println(seed, value)
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"last_insert_id": seed,
-	})
 }
