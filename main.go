@@ -83,10 +83,10 @@ func main() {
 	} else {
 		for true {
 			conn1, err := gorqlite.Open(rqliteURI)
-	
+
 			_, err1 := conn1.Leader()
 			utils.LogInfo("%s\t%s\t%v", "leader", rqliteURI, err1)
-	
+
 			if err != nil {
 				utils.LogInfo("RETRY")
 				time.Sleep(1 * time.Second)
