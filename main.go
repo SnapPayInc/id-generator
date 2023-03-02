@@ -63,7 +63,6 @@ func main() {
 	}
 	utils.LogInfo(fmt.Sprintf("API is running in [%s] mode", env))
 	initConfigs(env)
-	fmt.Println(viper.GetString("rqlite.uri"))
 
 	route := gin.Default()
 	logger := newLogger()
@@ -78,6 +77,7 @@ func main() {
 
 	var conn gorqlite.Connection
 	rqliteURI := viper.GetString("rqlite.uri")
+	utils.LogInfo("connect rqlite: %s", rqliteURI)
 	if env == "development" {
 		conn, _ = gorqlite.Open(rqliteURI)
 	} else {
@@ -99,7 +99,7 @@ func main() {
 	}
 
 	generatorStore := generator.NewGeneratorStore(&conn, logger)
-	generatorAPI := generator.NewGeneratorAPI(generatorStore, logger)
+	generatorAPI := generator.NewGeneratorAPI(generatorStore, logger, viper.GetString("namespace.allow-prefix"))
 	generatorAPI.InitRoute(route, "/id_generator")
 
 	//cleaner := workers.NewCleaner(generatorStore, logger)

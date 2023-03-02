@@ -3,9 +3,10 @@ package generator
 import (
 	"crypto/sha1"
 	"fmt"
-	"strconv"
 	"id-generator/utils"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -15,10 +16,11 @@ import (
 type GeneratorAPI struct {
 	generatorStore *GeneratorDB
 	Logger         *zap.Logger
+	Prefix         string
 }
 
-func NewGeneratorAPI(generatorStore *GeneratorDB, logger *zap.Logger) (app *GeneratorAPI) {
-	app = &GeneratorAPI{generatorStore: generatorStore, Logger: logger}
+func NewGeneratorAPI(generatorStore *GeneratorDB, logger *zap.Logger, prefix string) (app *GeneratorAPI) {
+	app = &GeneratorAPI{generatorStore: generatorStore, Logger: logger, Prefix: prefix}
 	return app
 }
 
@@ -34,10 +36,37 @@ func tableNameHash(name string) string {
 	return fmt.Sprintf("h%x", bs)
 }
 
+func verifyKey(key string, prefix string) bool {
+	if prefix == "" { //no rule means all key is ok
+		return true
+	}
+	before, _, found := strings.Cut(key, "-")
+	if !found {
+		utils.LogInfo("verifyKey: invalid key (%s)", key)
+		return false
+	}
+	prefixes := strings.Split(prefix, ",")
+	for _, pre := range prefixes {
+		if pre == before {
+			return true
+		}
+	}
+	utils.LogInfo("verifyKey: prefix (%s) is not allowed", before)
+	return false
+}
+
 func (app *GeneratorAPI) tap(c *gin.Context) {
-	key := tableNameHash(c.Param("key"))
+	rawKey := c.Param("key")
+	if !verifyKey(rawKey, app.Prefix) {
+		c.JSON(http.StatusBadRequest,
+			gin.H{
+				"error": "Key is not allowed",
+			})
+		return
+	}
+	key := tableNameHash(rawKey)
 	var count int
-	count,err := strconv.Atoi(c.DefaultQuery("count", "1"))
+	count, err := strconv.Atoi(c.DefaultQuery("count", "1"))
 	if err != nil {
 		count = 1
 	}
@@ -76,11 +105,26 @@ func (app *GeneratorAPI) tap(c *gin.Context) {
 			"last_insert_id": seed,
 		})
 	}
-	
+
 }
 
 func (app *GeneratorAPI) set(c *gin.Context) {
-	key := tableNameHash(c.Param("key"))
+	rawKey := c.Param("key")
+	if !verifyKey(rawKey, app.Prefix) {
+		c.JSON(http.StatusBadRequest,
+			gin.H{
+				"error": "Key is not allowed",
+			})
+		return
+	}
+	key := tableNameHash(rawKey)
+	if !verifyKey(key, app.Prefix) {
+		c.JSON(http.StatusBadRequest,
+			gin.H{
+				"error": "Key is not allowed",
+			})
+		return
+	}
 	err := app.generatorStore.CreateTableIfNotExist(key)
 	if err != nil {
 		fmt.Println(1, err)
@@ -100,7 +144,7 @@ func (app *GeneratorAPI) set(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if val, ok := updateMap["value"]; ok {
 		value := int64(val.(float64))
 		seed, err := app.generatorStore.Set(key, value)

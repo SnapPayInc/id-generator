@@ -1,15 +1,16 @@
-FROM golang:1.15.2 AS build
+FROM golang:1.18 AS build
 
 RUN mkdir /opt/app
 WORKDIR /opt/app
-
-COPY ./go.mod ./go.mod
-RUN go mod download
 
 COPY ./*.go ./
 COPY ./generator ./generator
 COPY ./constants ./constants
 COPY ./utils ./utils
+
+COPY ./go.mod ./go.mod
+RUN go mod tidy
+RUN go mod download
 
 RUN go build -o bin main.go
 

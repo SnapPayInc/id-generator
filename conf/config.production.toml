@@ -1,2 +1,5 @@
 [rqlite]
 uri = "http://id-generator-rqlite:4001"
+
+[namespace]
+allow-prefix = "plutus"
