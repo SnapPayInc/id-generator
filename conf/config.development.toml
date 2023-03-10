@@ -2,4 +2,4 @@
 uri = "http://127.0.0.1:4001"
 
 [namespace]
-allow-prefix = "test,plutus"
+allow-prefix = "test,plutus,benefit"
