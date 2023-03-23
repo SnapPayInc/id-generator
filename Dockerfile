@@ -5,6 +5,7 @@ WORKDIR /opt/app
 
 COPY ./*.go ./
 COPY ./generator ./generator
+COPY ./snowflake ./snowflake
 COPY ./constants ./constants
 COPY ./utils ./utils
 

@@ -8,8 +8,11 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.4
 	github.com/rqlite/gorqlite v0.0.0-20200618114933-40a3fff2a017
 	github.com/spf13/viper v1.7.1
+	github.com/sumory/baseN4go v0.0.0-20141208021650-8d01e8450859
 	go.uber.org/zap v1.16.0
-	
+)
+
+require (
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect

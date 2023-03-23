@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"id-generator/constants"
 	"id-generator/generator"
+	"id-generator/snowflake"
 	"id-generator/utils"
 	"os"
 	"strings"
@@ -101,6 +102,9 @@ func main() {
 	generatorStore := generator.NewGeneratorStore(&conn, logger)
 	generatorAPI := generator.NewGeneratorAPI(generatorStore, logger, viper.GetString("namespace.allow-prefix"))
 	generatorAPI.InitRoute(route, "/id_generator")
+
+	snowflakeAPI := snowflake.NewGeneratorAPI(logger)
+	snowflakeAPI.InitRoute(route, "/id_snowflake")
 
 	//cleaner := workers.NewCleaner(generatorStore, logger)
 	//go cleaner.cleaner()
