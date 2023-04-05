@@ -1,5 +1,5 @@
 [rqlite]
-uri = "http://127.0.0.1:4001"
+uri = "http://id-generator-rqlite-0:4001"
 
 [namespace]
 allow-prefix = "test,plutus,benefit"

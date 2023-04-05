@@ -17,6 +17,10 @@ spec:
           env:
             - name: RQLITE__URI
               value: http://id-generator-rqlite:4001
+            # - name: API_ENV
+            #   value: production
+            - name: GIN_MODE
+              value: release
           image: id-generator-image
           imagePullPolicy: Always
           ports:
