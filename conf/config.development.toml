@@ -2,4 +2,4 @@
 uri = "http://id-generator-rqlite-0:4001"
 
 [namespace]
-allow-prefix = "test,plutus,benefit,notification"
+allow-prefix = "test,plutus,benefit,notification,market"
