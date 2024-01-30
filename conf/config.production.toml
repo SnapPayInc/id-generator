@@ -3,3 +3,7 @@ uri = "http://id-generator-rqlite:4001"
 
 [namespace]
 allow-prefix = "plutus,benefit,notification,market,settlement"
+
+[snowflake]
+# max-id starts from 100 and max value is 1023
+max-id = 101

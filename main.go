@@ -62,7 +62,7 @@ func main() {
 	if value, found := (*envVars)[constants.ApiOsEnv]; found {
 		env = value
 	}
-	utils.LogInfo(fmt.Sprintf("API is running in [%s] mode", env))
+	utils.LogInfo(fmt.Sprintf("API is running in %s env", env))
 	initConfigs(env)
 
 	route := gin.Default()
@@ -78,7 +78,7 @@ func main() {
 
 	var conn gorqlite.Connection
 	rqliteURI := viper.GetString("rqlite.uri")
-	utils.LogInfo("connect rqlite: %s", rqliteURI)
+	utils.LogInfo("Preparing for auto-increment generator: connect rqlite -> %s", rqliteURI)
 	if env == "development" {
 		conn, _ = gorqlite.Open(rqliteURI)
 	} else {
@@ -97,6 +97,23 @@ func main() {
 				break
 			}
 		}
+	}
+
+	utils.LogInfo("Preparing for snowflake generator ...")
+	maxId := viper.GetInt("snowflake.max-id")
+	if maxId < 100 {
+		utils.LogInfo("Snowflake generator not active.")
+	} else {
+		snowflake.SIdWorkers = make(map[int]*snowflake.IdWorker)
+		for i := 100; i <= maxId; i++ {
+			err, tmpWorker := snowflake.NewIdWorker(int64(i))
+			if err != nil {
+				utils.LogError(err)
+			} else {
+				snowflake.SIdWorkers[i] = tmpWorker
+			}
+		}
+		utils.LogInfo("Channels from 100 to %d for snowflake created.", maxId)
 	}
 
 	generatorStore := generator.NewGeneratorStore(&conn, logger)
