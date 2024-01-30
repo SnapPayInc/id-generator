@@ -10,4 +10,4 @@ namespace: component-test
 images:
   - name: id-generator-image
     newName: 594726941651.dkr.ecr.us-east-1.amazonaws.com/snappay/biz-component
-    newTag: id-generator-230929
+    newTag: id-generator-240130
