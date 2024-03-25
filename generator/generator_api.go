@@ -118,13 +118,6 @@ func (app *GeneratorAPI) set(c *gin.Context) {
 		return
 	}
 	key := tableNameHash(rawKey)
-	if !verifyKey(key, app.Prefix) {
-		c.JSON(http.StatusBadRequest,
-			gin.H{
-				"error": "Key is not allowed",
-			})
-		return
-	}
 	err := app.generatorStore.CreateTableIfNotExist(key)
 	if err != nil {
 		fmt.Println(1, err)

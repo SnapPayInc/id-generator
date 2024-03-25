@@ -5,9 +5,9 @@ resources:
   - rqlite-sts.yaml
   - id-generator-service.yaml
   - id-generator-deploy.yaml
-namespace: component-test
+namespace: component
 
 images:
   - name: id-generator-image
     newName: 594726941651.dkr.ecr.us-east-1.amazonaws.com/snappay/biz-component
-    newTag: id-generator-240130
+    newTag: id-generator-240325
